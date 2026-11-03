@@ -15,7 +15,6 @@ let itemsArray = [];
 
 function updateCounter() {
     const activeTasks = todoList.querySelectorAll('li:not(.completed)');
-    counter.textContent = activeTasks.length;
     counter.textContent = `${activeTasks.length} items left`;
 }
 
