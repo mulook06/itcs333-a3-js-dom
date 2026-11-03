@@ -1,4 +1,10 @@
 (function () {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
   function init() {
     const input = document.querySelector('#todo-input');
     const todoList = document.querySelector('#todo-list');
@@ -11,27 +17,11 @@
 
     let itemsArray = [];
 
-    function getItems() {
-      return Array.from(todoList.children);
-    }
-
-    function updateCounter() {
-      const n = getItems().filter(li => !li.classList.contains('completed')).length;
-      counter.textContent = `${n} ${n === 1 ? 'item' : 'items'} left`;
-    }
-
-    function applyFilter(predicate) {
-      getItems().forEach(li => {
-        li.style.display = predicate(li) ? 'flex' : 'none';
-      });
-    }
-
     // Add item (button click or Enter both trigger submit)
     todoForm.addEventListener('submit', function (event) {
       event.preventDefault();
       const inputValue = input.value.trim();
 
-      // Empty submission: add nothing, show error
       if (inputValue === '') {
         errorMsg.classList.remove('hidden');
         return;
@@ -75,23 +65,35 @@
 
     // Filters
     filterAllBtn.addEventListener('click', function () {
-      applyFilter(() => true);
+      applyFilter(function () { return true; });
     });
 
     filterActiveBtn.addEventListener('click', function () {
-      applyFilter(li => !li.classList.contains('completed'));
+      applyFilter(function (li) { return !li.classList.contains('completed'); });
     });
 
     filterCompletedBtn.addEventListener('click', function () {
-      applyFilter(li => li.classList.contains('completed'));
+      applyFilter(function (li) { return li.classList.contains('completed'); });
     });
 
     updateCounter();
-  }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
+    // ---- Helpers (hoisted; placed after all listeners on purpose) ----
+    function getItems() {
+      return Array.from(todoList.children);
+    }
+
+    function updateCounter() {
+      const n = getItems().filter(function (li) {
+        return !li.classList.contains('completed');
+      }).length;
+      counter.textContent = n + (n === 1 ? ' item' : ' items') + ' left';
+    }
+
+    function applyFilter(predicate) {
+      getItems().forEach(function (li) {
+        li.style.display = predicate(li) ? 'flex' : 'none';
+      });
+    }
   }
 })();
