@@ -1,4 +1,5 @@
-document.addEventListener('DOMContentLoaded', function() {
+(function () {
+    document.addEventListener('DOMContentLoaded', function() {
 
 let input =document.querySelector('#todo-input');
 let addButton =document.querySelector('#add-btn');
@@ -115,4 +116,5 @@ filterCompletedBtn.addEventListener('click', function()
 });
 
 
+ });
 });
