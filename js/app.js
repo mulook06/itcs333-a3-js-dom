@@ -1,120 +1,97 @@
 (function () {
-    document.addEventListener('DOMContentLoaded', function() {
+  function init() {
+    const input = document.querySelector('#todo-input');
+    const todoList = document.querySelector('#todo-list');
+    const errorMsg = document.querySelector('#error-msg');
+    const todoForm = document.querySelector('#todo-form');
+    const filterAllBtn = document.getElementById('filter-all');
+    const filterActiveBtn = document.getElementById('filter-active');
+    const filterCompletedBtn = document.getElementById('filter-done');
+    const counter = document.querySelector('#counter');
 
-let input =document.querySelector('#todo-input');
-let addButton =document.querySelector('#add-btn');
-let todoList =document.querySelector('#todo-list');
-let errorMsg =document.querySelector('#error-msg');
-let todoForm = document.querySelector('#todo-form');
-let deleteButton = document.querySelector('#delete-btn');
-let filterAlBtn = document.getElementById('filter-all');
-let filterActiveBtn = document.getElementById('filter-active');
-let filterCompletedBtn = document.getElementById('filter-done');
-let counter = document.querySelector('#counter');
+    let itemsArray = [];
 
-let itemsArray = [];
+    function getItems() {
+      return Array.from(todoList.children);
+    }
 
-function updateCounter() {
-    const activeTasks = todoList.querySelectorAll('li:not(.completed)');
-    counter.textContent = `${activeTasks.length} items left`;
-}
+    function updateCounter() {
+      const n = getItems().filter(li => !li.classList.contains('completed')).length;
+      counter.textContent = `${n} ${n === 1 ? 'item' : 'items'} left`;
+    }
 
-todoForm.addEventListener('submit', function(event) 
-{
- event.preventDefault();
- const inputValue = input.value.trim();
- //empty submission feature 
- if (inputValue === '')
-    {    
+    function applyFilter(predicate) {
+      getItems().forEach(li => {
+        li.style.display = predicate(li) ? 'flex' : 'none';
+      });
+    }
+
+    // Add item (button click or Enter both trigger submit)
+    todoForm.addEventListener('submit', function (event) {
+      event.preventDefault();
+      const inputValue = input.value.trim();
+
+      // Empty submission: add nothing, show error
+      if (inputValue === '') {
         errorMsg.classList.remove('hidden');
         return;
-    }
- 
-    errorMsg.classList.add('hidden');
+      }
+      errorMsg.classList.add('hidden');
 
-    itemsArray.push(inputValue);
-    console.log("saved items array" , itemsArray);
+      itemsArray.push(inputValue);
 
-    const li = document.createElement('li');
-    const span = document.createElement('span');
-    span.textContent = inputValue;
-    span.classList.add('item-text');
-    li.appendChild(span);
+      const li = document.createElement('li');
 
-    
+      const span = document.createElement('span');
+      span.textContent = inputValue;
+      span.classList.add('item-text');
+      li.appendChild(span);
 
-    const deleteBtn = document.createElement('button');
-   deleteBtn.textContent = 'Delete';
-   deleteBtn.classList.add('delete-btn');
-   li.appendChild(deleteBtn);
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = 'Delete';
+      deleteBtn.classList.add('delete-btn');
+      li.appendChild(deleteBtn);
 
-   todoList.appendChild(li);
-   input.value = '';  
-   updateCounter();
-
-});
-
-updateCounter();
-
-//event delegation 
-todoList.addEventListener('click', function(event) {
-        const li = event.target.closest('li');
-        if (!li) return; // If clicked outside an li, ignore
-
-        // If the delete button was clicked
-        if (event.target.classList.contains('delete-btn')) {
-            const spanText = li.querySelector('.item-text').textContent;
-            const itemIndex = itemsArray.indexOf(spanText);
-            if (itemIndex > -1) {
-                itemsArray.splice(itemIndex, 1);
-            }
-            li.remove();
-            updateCounter();
-        } 
-        // Otherwise, toggle completion on the list item
-        else {
-            li.classList.toggle('completed');
-            updateCounter();
-        }
+      todoList.appendChild(li);
+      input.value = '';
+      updateCounter();
     });
 
-//show all tasks 
-filterAlBtn.addEventListener('click', function()
-{
-  const tasks = todoList.querySelectorAll('li');
-  tasks.forEach(li => {li.style.display = 'flex'; });
-});
+    // Event delegation: ONE listener on #todo-list
+    todoList.addEventListener('click', function (event) {
+      const li = event.target.closest('li');
+      if (!li) return;
 
+      if (event.target.classList.contains('delete-btn')) {
+        const text = li.querySelector('.item-text').textContent;
+        const idx = itemsArray.indexOf(text);
+        if (idx > -1) itemsArray.splice(idx, 1);
+        li.remove();
+      } else {
+        li.classList.toggle('completed');
+      }
+      updateCounter();
+    });
 
-//show only active tasks
-filterActiveBtn.addEventListener('click', function()
-{
-  const tasks = todoList.querySelectorAll('li');  
-  tasks.forEach(li =>
-  { 
-    if (li.classList.contains('completed')){li.style.display = 'none';
-      
-    }else{
-      li.style.display = 'flex';
-    }
-  })
-});
+    // Filters
+    filterAllBtn.addEventListener('click', function () {
+      applyFilter(() => true);
+    });
 
-//show only done tasks 
-filterCompletedBtn.addEventListener('click', function()
-{
-  const tasks = todoList.querySelectorAll('li');
-  tasks.forEach(li => {
-    if (li.classList.contains('completed')) {
-       li.style.display = 'flex'; 
+    filterActiveBtn.addEventListener('click', function () {
+      applyFilter(li => !li.classList.contains('completed'));
+    });
 
-       } else {
-       li.style.display = 'none';
-       }
-     }
-    )
-});
+    filterCompletedBtn.addEventListener('click', function () {
+      applyFilter(li => li.classList.contains('completed'));
+    });
 
+    updateCounter();
+  }
 
- });
-});
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
