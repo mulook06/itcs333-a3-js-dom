@@ -23,7 +23,7 @@ todoForm.addEventListener('submit', function(event)
 {
  event.preventDefault();
  const inputValue = input.value.trim();
- //empty submission 
+ //empty submission feature 
  if (inputValue === '')
     {    
         errorMsg.classList.remove('hidden');
